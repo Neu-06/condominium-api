@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,10 +26,7 @@ SECRET_KEY = 'django-insecure-7=cehuu7@vx5tts*)(ap=r=*m2ct0r9q+s#@!-cvpj&#8$2s##
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
-# Application definition
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,20 +35,50 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',      
-    'corsheaders',         
+
+    # DRF + CORS
+    'rest_framework',
+    'corsheaders',
+
+    # App
+    'apps.cuentas',
+    'apps.residentes',
+    'apps.personal',
+    'apps.areas',  # <-- añadir
 ]
+
+AUTH_USER_MODEL = 'cuentas.Usuario'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# CORS (simple dev)
+CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # CSRF no es necesario para JWT (lo dejamos pero no aplica sin SessionAuth)
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Opcional: configuración simplejwt (claims extra)
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=12),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 ROOT_URLCONF = 'config.urls'
 
@@ -78,10 +106,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'condominium_db',  
+        'NAME': 'condominium',  
         'USER': 'neondb_owner',  
         'PASSWORD': 'npg_mHw6RfOljBy9',  
-        'HOST': 'ep-solitary-hill-adpnoj30-pooler.c-2.us-east-1.aws.neon.tech',  
+        'HOST': 'ep-curly-poetry-adcflm7j-pooler.c-2.us-east-1.aws.neon.tech',  
         'PORT': '5432',  
     }
 }
@@ -128,3 +156,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
