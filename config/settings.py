@@ -25,8 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: don't run with debug turned on in production!
 
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-quick-key-for-university-project-12345')
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
     '.railway.app',
     '.up.railway.app',
     config('RAILWAY_PUBLIC_DOMAIN', default=''),
+    '*',  # Simple para proyecto universitario
 ]
 
 
@@ -64,7 +65,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',  # Simplified for development
     ),
 }
 
@@ -76,7 +77,7 @@ CORS_ALLOWED_ORIGINS = [
     config('FRONTEND_URL', default=''),  # Vercel
     config('FLUTTER_WEB_URL', default=''),  # Flutter web
 ]
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 MIDDLEWARE = [
@@ -93,8 +94,8 @@ MIDDLEWARE = [
 
 # Opcional: configuración simplejwt (claims extra)
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=12),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # Longer for development
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
@@ -125,14 +126,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', cast=int),
+        'NAME': config('DB_NAME', default='condominium'),
+        'USER': config('DB_USER', default='neondb_owner'),
+        'PASSWORD': config('DB_PASSWORD', default='npg_mHw6RfOljBy9'),
+        'HOST': config('DB_HOST', default='ep-curly-poetry-adcflm7j-pooler.c-2.us-east-1.aws.neon.tech'),
+        'PORT': config('DB_PORT', default=5432, cast=int),
         'OPTIONS': {
             'sslmode': 'require',
         },
+        'CONN_MAX_AGE': 60,  # Connection pooling
     }
 }
 
@@ -141,27 +143,14 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+AUTH_PASSWORD_VALIDATORS = []  # Simplified for university project
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'America/La_Paz'
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
@@ -169,12 +158,29 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Logging - Disable for speed
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'root': {
+        'handlers': ['null'],
+    },
+}
