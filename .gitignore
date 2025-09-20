@@ -178,4 +178,4 @@ logs/
 
 # Archivos de configuración local que no quieres en production
 local_config.py
-dev_settings.py
+dev_settings.py.
