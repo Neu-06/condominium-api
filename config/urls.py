@@ -23,8 +23,10 @@ def redirect_to_admin(request):
 urlpatterns = [
     path('', redirect_to_admin),
     path('admin/', admin.site.urls),
-    path('api/cuenta/', include('apps.cuentas.urls')),
-    path('api/', include('apps.residentes.urls')),
-    path('api/', include('apps.personal.urls')),
-    path('api/', include('apps.areas.urls')),  
+    path('api/', include([
+        path('', include('apps.cuentas.urls')),
+        path('', include('apps.residentes.urls')),
+        path('', include('apps.personal.urls')),
+        path('', include('apps.areas.urls')),
+    ])),
 ]

@@ -7,7 +7,7 @@ class PersonalSerializer(serializers.ModelSerializer):
         fields = [
             'id','nombre','apellido','dni','fecha_nacimiento','telefono','correo',
             'direccion','fecha_contratacion','puesto','activo','fecha_salida',
-            'estado','fecha_creacion','actualizado'
+            'fecha_creacion','actualizado'
         ]
 
 class TareaSerializer(serializers.ModelSerializer):

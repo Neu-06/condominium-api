@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: don't run with debug turned on in production!
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-quick-key-for-university-project-12345')
+SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = [
@@ -34,7 +34,7 @@ ALLOWED_HOSTS = [
     '.railway.app',
     '.up.railway.app',
     config('RAILWAY_PUBLIC_DOMAIN', default=''),
-    '*',  # Simple para proyecto universitario
+    '*',  
 ]
 
 
@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'apps.cuentas',
     'apps.residentes',
     'apps.personal',
-    'apps.areas',  # <-- añadir
+    'apps.areas', 
 ]
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
@@ -65,17 +65,17 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',  # Simplified for development
+        'rest_framework.permissions.AllowAny',  
     ),
 }
 
 # CORS (simple dev)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Frontend web local
+    "http://localhost:5173",  
     "http://127.0.0.1:5173",
-    "http://localhost:3000",  # Flutter web local
-    config('FRONTEND_URL', default=''),  # Vercel
-    config('FLUTTER_WEB_URL', default=''),  # Flutter web
+    "http://localhost:3000",  
+    config('FRONTEND_URL', default=''),  
+    config('FLUTTER_WEB_URL', default=''),  
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -94,7 +94,7 @@ MIDDLEWARE = [
 
 # Opcional: configuración simplejwt (claims extra)
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # Longer for development
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
@@ -126,15 +126,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='condominium'),
-        'USER': config('DB_USER', default='neondb_owner'),
-        'PASSWORD': config('DB_PASSWORD', default='npg_mHw6RfOljBy9'),
-        'HOST': config('DB_HOST', default='ep-curly-poetry-adcflm7j-pooler.c-2.us-east-1.aws.neon.tech'),
-        'PORT': config('DB_PORT', default=5432, cast=int),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', cast=int),
         'OPTIONS': {
             'sslmode': 'require',
         },
-        'CONN_MAX_AGE': 60,  # Connection pooling
+        'CONN_MAX_AGE': 60,  
     }
 }
 
@@ -143,7 +143,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = []  # Simplified for university project
+AUTH_PASSWORD_VALIDATORS = []  
 
 
 # Internationalization
@@ -184,3 +184,12 @@ LOGGING = {
         'handlers': ['null'],
     },
 }
+
+# CONFIGURACIÓN EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = f"Smart Condominium <{config('EMAIL_HOST_USER')}>"

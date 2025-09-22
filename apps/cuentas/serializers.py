@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Usuario, Rol
+from .models import Usuario, Rol, Bitacora
+from apps.residentes.models import Residente
+from apps.personal.models import Personal
 
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,10 +10,13 @@ class RolSerializer(serializers.ModelSerializer):
 
 class UsuarioReadSerializer(serializers.ModelSerializer):
     rol = RolSerializer(read_only=True)
+    residente_nombre = serializers.CharField(source='residente.nombre', read_only=True)
+    personal_nombre = serializers.CharField(source='personal.nombre', read_only=True)
 
     class Meta:
         model = Usuario
-        fields = ['id', 'correo', 'nombre', 'apellido', 'telefono', 'is_active', 'last_login', 'rol']
+        fields = ['id', 'correo', 'nombre', 'apellido', 'telefono', 'is_active', 'last_login', 
+                 'rol', 'residente', 'residente_nombre', 'personal', 'personal_nombre']
 
 class UsuarioWriteSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
@@ -21,10 +26,10 @@ class UsuarioWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ['id', 'correo', 'password', 'nombre', 'apellido', 'telefono', 'rol_id', 'is_active']
+        fields = ['id', 'correo', 'password', 'nombre', 'apellido', 'telefono', 
+                 'residente', 'personal', 'rol_id', 'is_active']
 
     def to_internal_value(self, data):
-        # Permitir actualizar sin password en PUT/PATCH
         if self.instance and 'password' not in data:
             self.fields['password'].required = False
         return super().to_internal_value(data)
@@ -48,7 +53,7 @@ class RegistroSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ['id', 'correo', 'password', 'nombre', 'apellido']
+        fields = ['id', 'correo', 'password', 'nombre', 'apellido', 'residente', 'personal']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -59,9 +64,59 @@ class RegistroSerializer(serializers.ModelSerializer):
         return user
 
 class PerfilSerializer(serializers.ModelSerializer):
-    rol = serializers.CharField(source='rol.nombre', read_only=True)  # ajusta según tu modelo (rol.nombre o rol.slug)
+    rol = serializers.CharField(source='rol.nombre', read_only=True)
+    residente_info = serializers.SerializerMethodField()
+    personal_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
-        fields = ['id', 'correo', 'nombre', 'apellido', 'rol']
+        fields = ['id', 'correo', 'nombre', 'apellido', 'rol', 'residente_info', 'personal_info']
+
+    def get_residente_info(self, obj):
+        if obj.residente:
+            return {
+                'id': obj.residente.id,
+                'nombre': obj.residente.nombre,
+                'apellidos': obj.residente.apellidos,
+                'residencia': obj.residente.residencia.numero if obj.residente.residencia else None
+            }
+        return None
+
+    def get_personal_info(self, obj):
+        if obj.personal:
+            return {
+                'id': obj.personal.id,
+                'nombre': obj.personal.nombre,
+                'cargo': obj.personal.cargo,
+                'area': obj.personal.area.nombre if obj.personal.area else None
+            }
+        return None
+
+class RecuperarPasswordSerializer(serializers.Serializer):
+    correo = serializers.EmailField()
+
+class CambiarPasswordSerializer(serializers.Serializer):
+    password_actual = serializers.CharField()
+    password_nueva = serializers.CharField(min_length=4)
+
+class BitacoraSerializer(serializers.ModelSerializer):
+    usuario_correo = serializers.CharField(source='usuario.correo', read_only=True)
+
+    class Meta:
+        model = Bitacora
+        fields = ['id', 'usuario', 'usuario_correo', 'accion', 'descripcion', 'ip', 'fecha']
+        read_only_fields = ['fecha']
+
+class SolicitarRecuperacionSerializer(serializers.Serializer):
+    correo = serializers.EmailField()
+
+class ConfirmarRecuperacionSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=100)
+    nueva_password = serializers.CharField(min_length=6, max_length=128)
+    confirmar_password = serializers.CharField(max_length=128)
+    
+    def validate(self, attrs):
+        if attrs['nueva_password'] != attrs['confirmar_password']:
+            raise serializers.ValidationError("Las contraseñas no coinciden")
+        return attrs
 

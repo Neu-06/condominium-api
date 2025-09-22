@@ -2,10 +2,16 @@ from django.db import models
 
 
 class Personal(models.Model):
-    ESTADO_CHOICES = (
-        ('ACTIVO', 'Activo'),
-        ('INACTIVO', 'Inactivo'),
+    PUESTO_CHOICES = (
+        ('ADMINISTRADOR', 'Administrador'),
+        ('SUPERVISOR', 'Supervisor'),
+        ('MANTENIMIENTO', 'Mantenimiento'),
+        ('SEGURIDAD', 'Seguridad'),
+        ('LIMPIEZA', 'Limpieza'),
+        ('OTRO', 'Otro'),
     )
+        
+        
     nombre = models.CharField(max_length=80)
     apellido = models.CharField(max_length=100)
     dni = models.CharField(max_length=30, unique=True)
@@ -17,7 +23,6 @@ class Personal(models.Model):
     puesto = models.CharField(max_length=100, blank=True)
     activo = models.BooleanField(default=True)
     fecha_salida = models.DateField(null=True, blank=True)
-    estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='ACTIVO')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 
