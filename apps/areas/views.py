@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -58,14 +59,32 @@ class ReglaViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class HorarioViewSet(viewsets.ModelViewSet):
-    queryset = Horario.objects.select_related('area').all().order_by('area', 'id')
+    queryset = Horario.objects.select_related('area').all().order_by('area','id')
     serializer_class = HorarioSerializer
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.action in ['create', 'update', 'partial_update']:
+        if self.action in ['create','update','partial_update']:
             return HorarioCreateSerializer
         return HorarioSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request,*args,**kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail":"Ya existe un horario para ese día en esa área."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request,*args,**kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail":"Conflicto de día/área existente."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     @action(detail=False, methods=['get'], url_path='por-area/(?P<area_id>[^/.]+)')
     def por_area(self, request, area_id=None):

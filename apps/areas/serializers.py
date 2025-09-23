@@ -3,7 +3,8 @@ from .models import AreaComun, Regla, Horario
 
 
 class HorarioSerializer(serializers.ModelSerializer):
-    area_nombre = serializers.CharField(source='area.nombre', read_only=True)
+    area_nombre = serializers.CharField(source="area.nombre", read_only=True)
+
     class Meta:
         model = Horario
         fields = [
@@ -17,6 +18,39 @@ class HorarioSerializer(serializers.ModelSerializer):
             "creado",
             "actualizado",
         ]
+
+
+class HorarioCreateSerializer(serializers.ModelSerializer):
+    area_nombre = serializers.CharField(source="area.nombre", read_only=True)
+
+    class Meta:
+        model = Horario
+        fields = [
+            "id",
+            "area",
+            "dia_semana",
+            "hora_apertura",
+            "hora_cierre",
+            "activo",
+            "area_nombre",
+        ]
+
+    def validate(self, attrs):
+        area = attrs.get("area")
+        dia = attrs.get("dia_semana")
+        instance = getattr(self, "instance", None)
+        qs = Horario.objects.filter(area=area, dia_semana=dia)
+        if instance:
+            qs = qs.exclude(pk=instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                {"dia_semana": "Ya existe un horario para este día en esta área."}
+            )
+        if attrs["hora_apertura"] >= attrs["hora_cierre"]:
+            raise serializers.ValidationError(
+                {"hora_cierre": "La hora de cierre debe ser mayor que la de apertura."}
+            )
+        return attrs
 
 
 class ReglaSerializer(serializers.ModelSerializer):
@@ -63,17 +97,3 @@ class AreaComunSerializer(serializers.ModelSerializer):
             "creado",
             "actualizado",
         ]
-
-
-class HorarioCreateSerializer(serializers.ModelSerializer):
-    area_nombre = serializers.CharField(source='area.nombre', read_only=True)  
-    class Meta:
-        model = Horario
-
-    fields = [
-        "area",
-        "dia_semana",
-        "hora_apertura",
-        "hora_cierre",
-        "activo",
-    ]
