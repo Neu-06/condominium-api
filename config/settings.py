@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'apps.residentes',
     'apps.personal',
     'apps.areas', 
+    'apps.reconocimiento',
+    'apps.analytics',
 ]
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
@@ -194,3 +196,8 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 BREVO_API_KEY = config('BREVO_API_KEY')
+
+# Para archivos de imagen más grandes
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+

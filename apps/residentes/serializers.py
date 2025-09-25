@@ -16,7 +16,7 @@ class ResidenciaSerializer(serializers.ModelSerializer):
 class VehiculoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehiculo
-        fields = ['id','marca','modelo','matricula','color','tipo','residente']
+        fields = ['id','marca','modelo','matricula','color','tipo','imagen_vehiculo','residente']
         
 class MascotaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,4 +26,9 @@ class MascotaSerializer(serializers.ModelSerializer):
 class VisitanteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Visitante
-        fields = ['id','nombre','apellidos','dni','telefono','residente','fecha_visita','hora_entrada','hora_salida']
+        fields = ['id','nombre','apellidos','dni','telefono','residente','fecha_visita','hora_entrada','hora_salida','foto_ingreso']
+        
+class AutorizacionVisitaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AutorizacionVisita
+        fields = ['id','residente_autorizador','visitante_esperado','documento_esperado','fecha_autorizacion','fecha_expiracion','utilizada']        
