@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('residentes', '0002_vehiculo_imagen_vehiculo_vehiculo_placa_and_more'),
+       # ('residentes', '0002_vehiculo_imagen_vehiculo_vehiculo_placa_and_more'),
     ]
 
     operations = [
