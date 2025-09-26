@@ -65,8 +65,6 @@ class Vehiculo(models.Model):
     matricula = models.CharField(max_length=20, unique=True, blank=True )
     color = models.CharField(max_length=30, blank=True)
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
-    #Cambios de Alejandro Sejas
-    imagen_vehiculo = models.ImageField(upload_to='vehiculos/', null=True)
     #
     residente = models.ForeignKey(
         Residente, related_name="vehiculos", on_delete=models.CASCADE
@@ -119,12 +117,4 @@ class Visitante(models.Model):
         return f"{self.nombre} {self.apellidos}"
     
     
-    ####cambio de alejandro sejas
-class AutorizacionVisita(models.Model):
-        residente_autorizador = models.ForeignKey('residentes.Residente', on_delete=models.CASCADE)
-        visitante_esperado = models.CharField(max_length=100)
-        documento_esperado = models.CharField(max_length=20)
-        fecha_autorizacion = models.DateTimeField(auto_now_add=True)
-        fecha_expiracion = models.DateTimeField()
-        utilizada = models.BooleanField(default=False)
         

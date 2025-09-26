@@ -30,7 +30,3 @@ class VisitanteViewSet(viewsets.ModelViewSet):
     serializer_class = VisitanteSerializer
     permission_classes = [IsAuthenticated]
     
-class AutorizacionVisitaViewSet(viewsets.ModelViewSet):
-    queryset = AutorizacionVisita.objects.all().order_by('id')
-    serializer_class = AutorizacionVisitaSerializer
-    permission_classes = [IsAuthenticated]    

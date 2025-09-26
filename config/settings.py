@@ -56,8 +56,6 @@ INSTALLED_APPS = [
     'apps.residentes',
     'apps.personal',
     'apps.areas', 
-    'apps.reconocimiento',
-    'apps.analytics',
 ]
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
