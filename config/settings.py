@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'apps.residentes',
     'apps.personal',
     'apps.areas', 
+    'apps.reserva_pagos',
 ]
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
@@ -132,7 +133,7 @@ DATABASES = {
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT', cast=int),
         'OPTIONS': {
-            'sslmode': 'require',
+            'sslmode':  'disable', # 'require' for production, 'disable' for local
         },
         'CONN_MAX_AGE': 60,  
     }
