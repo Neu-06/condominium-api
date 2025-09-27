@@ -8,7 +8,7 @@ router.register('residencias', ResidenciaViewSet, basename='residencias')
 router.register('vehiculos', VehiculoViewSet, basename='vehiculos')
 router.register('mascotas', MascotaViewSet, basename='mascotas')
 router.register('visitantes', VisitanteViewSet, basename='visitantes')
-
+router.register('autorizaciones_visita', AutorizacionVisitaViewSet, basename='autorizaciones_visita')
 urlpatterns = [
     path('', include(router.urls)),
 ]

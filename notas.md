@@ -1,8 +1,8 @@
 ## notas del desarrollo
-
 ### link de la documentacion:
 
 https://docs.google.com/document/d/1SBf6Vo6FvbQgA7vi2iW9b53WT75j9e6VQgtbJpVcEcY/edit?usp=sharing
+
 
 ### como activar el entorno virtual
 
@@ -31,6 +31,15 @@ python manage.py startapp nombre_de_app ruta_desde_la_raiz/nombre_de_app
 5. urls.py      
 6. config/urls.py
 7. probar endpoints
+
+## Instalación de dependencias Django
+
+Para instalar las dependencias del proyecto Django, ejecuta:
+
+```powershell
+pip install -r requirements.txt
+```
+
 
 ### comandos de migracion:
 ##### si requiere app
