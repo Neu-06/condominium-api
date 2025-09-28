@@ -6,8 +6,9 @@ class ResidenteSerializer(serializers.ModelSerializer):
         model = Residente
         fields = [
             'id','nombre','apellidos','fecha_nacimiento','telefono','correo',
-            'dni','sexo','tipo','residencia','activo','fecha_creacion','actualizado'
+            'dni','sexo','tipo','residencia','foto_perfil','activo','fecha_creacion','actualizado'
         ]
+
 class ResidenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Residencia
@@ -26,5 +27,7 @@ class MascotaSerializer(serializers.ModelSerializer):
 class VisitanteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Visitante
-        fields = ['id','nombre','apellidos','dni','telefono','residente','fecha_visita','hora_entrada','hora_salida']
-        
+        fields = [
+            'id','nombre','apellidos','dni','telefono','residente',
+            'foto_referencial','fecha_visita','hora_entrada','hora_salida'
+        ]

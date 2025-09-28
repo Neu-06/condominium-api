@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register('roles', RolViewSet, basename='roles')
 router.register('usuarios', UsuarioViewSet, basename='usuarios')
 router.register('bitacora', BitacoraViewSet, basename='bitacora')
+router.register('avisos', AvisoViewSet, basename='avisos')
 
 urlpatterns = [
     path('cuenta/token/', LoginJWTView.as_view(), name='token_obtain_pair'),

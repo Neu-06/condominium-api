@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuario, Rol, Bitacora
+from .models import Usuario, Rol, Bitacora, Aviso
 from apps.residentes.models import Residente
 from apps.personal.models import Personal
 
@@ -120,3 +120,7 @@ class ConfirmarRecuperacionSerializer(serializers.Serializer):
             raise serializers.ValidationError("Las contraseñas no coinciden")
         return attrs
 
+class AvisoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Aviso
+        fields = ['id', 'asunto', 'mensaje', 'fecha_push', 'hora_push', 'urgente', 'estado']

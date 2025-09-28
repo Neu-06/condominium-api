@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import os
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -150,10 +151,9 @@ AUTH_PASSWORD_VALIDATORS = []
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
-
+TIME_ZONE = "America/La_Paz"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -195,7 +195,14 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 BREVO_API_KEY = config('BREVO_API_KEY')
 
-# Para archivos de imagen más grandes
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
+# CONFIGURACIÓN CLOUDINARY
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+)
+
+# CONFIGURACIÓN FACE++ API
+FACEPP_API_KEY = config('FACEPP_API_KEY')
+FACEPP_API_SECRET = config('FACEPP_API_SECRET')

@@ -42,6 +42,7 @@ class Residente(models.Model):
     residencia = models.ForeignKey(
         Residencia, related_name="residentes", on_delete=models.CASCADE,null=True
     )
+    foto_perfil = models.URLField(null=True, blank=True)
     activo = models.BooleanField(default=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
@@ -65,7 +66,6 @@ class Vehiculo(models.Model):
     matricula = models.CharField(max_length=20, unique=True, blank=True )
     color = models.CharField(max_length=30, blank=True)
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
-    #
     residente = models.ForeignKey(
         Residente, related_name="vehiculos", on_delete=models.CASCADE
     )
@@ -104,12 +104,10 @@ class Visitante(models.Model):
     residente = models.ForeignKey(
         Residente, related_name="visitantes", on_delete=models.CASCADE
     )
+    foto_referencial = models.URLField(null=True, blank=True)
     fecha_visita = models.DateTimeField(auto_now_add=True)
     hora_entrada = models.DateTimeField(null=True, blank=True)
     hora_salida = models.DateTimeField(null=True, blank=True)
-    #cambio de alejandro sejas
-    foto_ingreso = models.ImageField(upload_to='visitantes/')
-    ####
     class Meta:
         ordering = ["id"]
 

@@ -121,3 +121,26 @@ class Bitacora(models.Model):
 
     def __str__(self):
         return f"{self.usuario.correo} - {self.accion} - {self.fecha}"
+    
+class Aviso(models.Model):
+    ESTADO_CHOICES = (
+        ('PENDIENTE', 'Pendiente'),
+        ('ENVIADO', 'Enviado'),
+        ('FALLIDO', 'Fallido'),
+    )
+    
+    asunto = models.CharField(max_length=200)
+    mensaje = models.TextField()
+    fecha_push = models.DateField(null=True, blank=True)
+    hora_push = models.TimeField(null=True, blank=True)
+    urgente = models.BooleanField(default=False) 
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, blank=True)
+
+    def __str__(self):
+        return self.asunto
+
+    class Meta:
+        db_table = 'aviso'
+        verbose_name = 'Aviso'
+        verbose_name_plural = 'Avisos'
+        ordering = ['-fecha_push']

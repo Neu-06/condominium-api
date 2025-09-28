@@ -14,7 +14,7 @@ import random
 import string
 import secrets
 
-from .models import Usuario, Rol, Bitacora
+from .models import Usuario, Rol, Bitacora, Aviso
 from .serializers import (
     UsuarioReadSerializer,
     UsuarioWriteSerializer,
@@ -26,6 +26,7 @@ from .serializers import (
     SolicitarRecuperacionSerializer,
     ConfirmarRecuperacionSerializer,
     RecuperarPasswordSerializer,
+    AvisoSerializer
 )
 
 
@@ -366,3 +367,7 @@ def registrar_bitacora(usuario, accion, descripcion="", request=None):
     Bitacora.objects.create(
         usuario=usuario, accion=accion, descripcion=descripcion, ip=ip
     )
+
+class AvisoViewSet(viewsets.ModelViewSet):
+    queryset = Aviso.objects.all().order_by('-fecha_push')
+    serializer_class = AvisoSerializer
