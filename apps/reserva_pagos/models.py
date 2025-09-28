@@ -65,11 +65,16 @@ class ConceptoPago(models.Model):
 
 
 class Factura(models.Model):
-    
+    FACTURA_ESTADO_CHOICES = [
+    ('pendiente', 'Pendiente'),
+    ('pagada', 'Pagada'),
+    ('vencida', 'Vencida'),
+    ('cancelada', 'Cancelada'),
+    ]
     residente = models.ForeignKey(Residente, on_delete=models.CASCADE)
     concepto = models.ManyToManyField(ConceptoPago, through='DetalleFactura')
     monto_total = models.DecimalField(max_digits=10, decimal_places=2)
-    estado = models.TextField(max_length=100)
+    estado = models.CharField(max_length=20, choices=FACTURA_ESTADO_CHOICES, default='pendiente')
     fecha_limite = models.DateField(null=True, blank=True)
     fecha_emision = models.DateField(null=True, blank=True)
     descripcion = models.TextField(max_length=200)
@@ -89,3 +94,27 @@ class DetalleFactura(models.Model):
     def __str__(self):
         return f"Detalle de {self.concepto.nombre} para Factura {self.factura.id}"
       
+#clase creada por claueia de pago que estara relacionada con factura       
+class Pago(models.Model):
+    ESTADO_CHOICES = [
+        ('pending', 'Pendiente'),
+        ('approved', 'Aprobado'),
+        ('rejected', 'Rechazado'),
+    ]
+    
+    factura = models.ForeignKey(Factura, on_delete=models.CASCADE)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pending')
+    payment_id = models.CharField(max_length=200, blank=True, null=True)  # ID de MercadoPago
+    preference_id = models.CharField(max_length=200, blank=True, null=True)  # ID de preferencia
+    metodo_pago = models.CharField(max_length=50, blank=True)
+    fecha_pago = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-fecha_pago']
+        verbose_name = 'Pago'
+        verbose_name_plural = 'Pagos'
+
+    def __str__(self):
+        return f"Pago #{self.id} - Factura {self.factura.id} - {self.estado}"

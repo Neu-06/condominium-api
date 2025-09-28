@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Aviso, Reserva, Visita, ConceptoPago, Factura, DetalleFactura
+from .models import Aviso, Reserva, Visita, ConceptoPago, Factura, DetalleFactura,Pago
 
 class AvisoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,5 +34,19 @@ class FacturaSerializer(serializers.ModelSerializer):
         model = Factura
         fields = [
             'id', 'residente','concepto', 'monto_total', 'estado', 
-            'fecha_limite', 'fecha_emision','descripcion', 
+            'fecha_limite', 'fecha_emision','descripcion','pagos', 
+        ]#se agrego pagos 
+        
+#parte de la implmentacion de claude IA
+
+class PagoSerializer(serializers.ModelSerializer):
+    factura_info = FacturaSerializer(source='factura', read_only=True)
+    
+    class Meta:
+        model = Pago
+        fields = [
+            'id', 'factura', 'factura_info', 'monto', 'estado', 
+            'payment_id', 'preference_id', 'metodo_pago', 
+            'fecha_pago', 'fecha_actualizacion'
         ]
+        
