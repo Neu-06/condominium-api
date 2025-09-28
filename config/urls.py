@@ -28,8 +28,6 @@ urlpatterns = [
         path('', include('apps.residentes.urls')),
         path('', include('apps.personal.urls')),
         path('', include('apps.areas.urls')),
-        #path('visitantes/', include('apps.visitantes.urls')),
-        #path('analytics/', include('apps.analytics.urls')),
-        # path('reconocimiento/', include('apps.reconocimiento.urls')),
+        path('', include('apps.reserva_pagos.urls')),
     ])),
 ]

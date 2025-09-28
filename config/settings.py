@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'apps.residentes',
     'apps.personal',
     'apps.areas', 
+    'apps.reserva_pagos',
 ]
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
