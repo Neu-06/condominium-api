@@ -3,11 +3,17 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action  # ✅ Asegúrate de importar esto
 from .models import Reserva, ConceptoPago, Factura, DetalleFactura, Pago
 from .serializers import (
     ReservaSerializer, ConceptoPagoSerializer, FacturaSerializer,
-    DetalleFacturaSerializer, PagoSerializer
+    DetalleFacturaSerializer, PagoSerializer, PagoCreateSerializer
 )
+import stripe
+from django.conf import settings
+
+# Configurar Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class ReservaViewSet(viewsets.ModelViewSet):
     queryset = Reserva.objects.all().order_by('id')
@@ -46,6 +52,124 @@ class DetalleFacturaViewSet(viewsets.ModelViewSet):
         return response
 
 class PagoViewSet(viewsets.ModelViewSet):
-    queryset = Pago.objects.all().order_by('-fecha_pago')
+    queryset = Pago.objects.all()
     serializer_class = PagoSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return PagoCreateSerializer
+        return PagoSerializer
+    
+    def perform_create(self, serializer):
+        serializer.save(residente=self.request.user.residente)
+
+    @action(detail=False, methods=['post'])  # ✅ Verifica que tenga este decorador
+    def crear_payment_intent(self, request):
+        """Crear un PaymentIntent de Stripe"""
+        try:
+            factura_id = request.data.get('factura_id')
+            if not factura_id:
+                return Response(
+                    {'error': 'factura_id es requerido'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Verificar que la factura existe y pertenece al usuario
+            try:
+                factura = Factura.objects.get(id=factura_id, residente=request.user.residente)
+            except Factura.DoesNotExist:
+                return Response(
+                    {'error': 'Factura no encontrada'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Verificar que la factura no esté ya pagada
+            if factura.estado == 'pagada':
+                return Response(
+                    {'error': 'La factura ya está pagada'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Convertir monto a centavos (Stripe usa centavos)
+            monto_centavos = int(float(factura.monto_total) * 100)
+            
+            # Crear PaymentIntent en Stripe
+            intent = stripe.PaymentIntent.create(
+                amount=monto_centavos,
+                currency='usd',  # o 'bob' si soporta bolivianos
+                metadata={
+                    'factura_id': factura.id,
+                    'residente_id': request.user.residente.id,
+                    'descripcion': factura.descripcion or f'Pago factura #{factura.id}'
+                }
+            )
+            
+            # Crear registro de pago en la BD
+            pago = Pago.objects.create(
+                factura=factura,
+                residente=request.user.residente,
+                monto=factura.monto_total,
+                metodo_pago='stripe',
+                estado='pendiente',
+                stripe_payment_intent_id=intent.id,
+                stripe_client_secret=intent.client_secret
+            )
+            
+            return Response({
+                'payment_intent_id': intent.id,
+                'client_secret': intent.client_secret,
+                'pago_id': pago.id,
+                'monto': float(factura.monto_total),
+                'factura_id': factura.id
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['post'])  # ✅ Verifica que tenga este decorador
+    def confirmar_pago(self, request):
+        """Confirmar el pago después de que Stripe lo procese"""
+        try:
+            payment_intent_id = request.data.get('payment_intent_id')
+            if not payment_intent_id:
+                return Response(
+                    {'error': 'payment_intent_id es requerido'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Buscar el pago en la BD
+            try:
+                pago = Pago.objects.get(
+                    stripe_payment_intent_id=payment_intent_id,
+                    residente=request.user.residente
+                )
+            except Pago.DoesNotExist:
+                return Response(
+                    {'error': 'Pago no encontrado'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # --- MODIFICACIÓN PARA GUARDAR COMO EXITO ---
+            pago.estado = 'completado'
+            pago.referencia_pago = payment_intent_id
+            pago.save()
+            
+            factura = pago.factura
+            factura.estado = 'pagada'
+            factura.save()
+            
+            return Response({
+                'message': 'Pago confirmado exitosamente',
+                'pago_id': pago.id,
+                'factura_id': factura.id,
+                'estado': 'pagada'
+            })
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

@@ -29,5 +29,6 @@ urlpatterns = [
         path('', include('apps.personal.urls')),
         path('', include('apps.areas.urls')),
         path('', include('apps.reserva_pagos.urls')),
+        path('', include('apps.vision_artificial.urls')),
     ])),
 ]

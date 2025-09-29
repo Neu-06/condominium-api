@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Reserva, ConceptoPago, Factura, DetalleFactura, Pago
+from .models import Reserva, Factura, DetalleFactura, ConceptoPago, Pago
 from apps.areas.models import AreaComun
 from apps.residentes.models import Residente
 
@@ -83,6 +83,20 @@ class DetalleFacturaSerializer(serializers.ModelSerializer):
         factura.save()
 
 class PagoSerializer(serializers.ModelSerializer):
+    residente_nombre = serializers.CharField(source='residente.nombre', read_only=True)
+    factura_numero = serializers.IntegerField(source='factura.id', read_only=True)
+    
     class Meta:
         model = Pago
-        fields = '__all__'
+        fields = [
+            'id', 'factura', 'residente', 'monto', 'metodo_pago', 'estado',
+            'stripe_payment_intent_id', 'stripe_client_secret',
+            'fecha_creacion', 'fecha_actualizacion', 'referencia_pago', 'notas',
+            'residente_nombre', 'factura_numero'
+        ]
+        read_only_fields = ['stripe_payment_intent_id', 'stripe_client_secret']
+
+class PagoCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pago
+        fields = ['factura', 'residente', 'monto', 'metodo_pago']

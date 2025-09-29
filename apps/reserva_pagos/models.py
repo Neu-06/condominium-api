@@ -90,22 +90,41 @@ class DetalleFactura(models.Model):
 
 
 class Pago(models.Model):
-    ESTADO_CHOICES = [
-        ("pending", "Pendiente"),
-        ("approved", "Aprobado"),
-        ("rejected", "Rechazado"),
+    ESTADOS_PAGO = [
+        ('pendiente', 'Pendiente'),
+        ('procesando', 'Procesando'),
+        ('completado', 'Completado'),
+        ('fallido', 'Fallido'),
+        ('cancelado', 'Cancelado'),
+        ('reembolsado', 'Reembolsado'),
     ]
-    factura = models.ForeignKey(Factura, on_delete=models.CASCADE, related_name="pagos")
+    
+    METODOS_PAGO = [
+        ('stripe', 'Stripe'),
+        ('efectivo', 'Efectivo'),
+        ('transferencia', 'Transferencia'),
+    ]
+    
+    factura = models.ForeignKey(Factura, on_delete=models.CASCADE, related_name='pagos')
+    residente = models.ForeignKey(Residente, on_delete=models.CASCADE, default=1)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="pending")
-    payment_id = models.CharField(max_length=200, blank=True, null=True)  # ID de la transacción en Stripe
-    fecha_pago = models.DateTimeField(auto_now_add=True)
-    notas = models.TextField(blank=True, null=True)  # Mensajes de error o detalles
-
+    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='stripe')
+    estado = models.CharField(max_length=20, choices=ESTADOS_PAGO, default='pendiente')
+    
+    # Campos específicos de Stripe
+    stripe_payment_intent_id = models.CharField(max_length=200, null=True, blank=True)
+    stripe_client_secret = models.CharField(max_length=300, null=True, blank=True)
+    
+    # Timestamps y datos adicionales
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    referencia_pago = models.CharField(max_length=100, null=True, blank=True)
+    notas = models.TextField(null=True, blank=True)
+    
     class Meta:
-        ordering = ["-fecha_pago"]
-        verbose_name = "Pago"
-        verbose_name_plural = "Pagos"
-
+        ordering = ['-fecha_creacion']
+        verbose_name = 'Pago'
+        verbose_name_plural = 'Pagos'
+    
     def __str__(self):
-        return f"Pago #{self.id} - Factura {self.factura.id} - {self.estado}"
+        return f'Pago #{self.id} - Factura #{self.factura.id} - Bs{self.monto}'

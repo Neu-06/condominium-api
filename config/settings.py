@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'apps.personal',
     'apps.areas', 
     'apps.reserva_pagos',
+    'apps.vision_artificial',
 ]
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
@@ -207,3 +208,7 @@ cloudinary.config(
 # CONFIGURACIÓN FACE++ API
 FACEPP_API_KEY = config('FACEPP_API_KEY')
 FACEPP_API_SECRET = config('FACEPP_API_SECRET')
+
+# En settings.py
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')

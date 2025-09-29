@@ -1,11 +1,17 @@
 from django.db import models
+from apps.residentes.models import Residente
 
 class logReconocimiento(models.Model):
-    nombre = models.CharField(max_length=100)
+    residente = models.ForeignKey(
+        Residente, on_delete=models.SET_NULL, null=True, blank=True
+    )
     fecha_hora = models.DateTimeField(auto_now_add=True)
-    tipo_evento = models.CharField(max_length=50)  # e.g., 'ingreso', 'salida', 'anomalía'
-    imagen = models.ImageField(upload_to='reconocimiento_facial/', null=True, blank=True)
+    foto_ruta = models.URLField(max_length=200, null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
+    coincidencia = models.FloatField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.nombre} - {self.tipo_evento} - {self.fecha_hora.strftime('%Y-%m-%d %H:%M:%S')}"
+        if self.residente:
+            return f"{self.residente} - {self.fecha_hora.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"Desconocido - {self.fecha_hora.strftime('%Y-%m-%d %H:%M:%S')}"
+
