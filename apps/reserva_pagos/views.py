@@ -132,36 +132,46 @@ class PagoViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'])  # ✅ Verifica que tenga este decorador
     def confirmar_pago(self, request):
-        """Confirmar el pago después de que Stripe lo procese"""
+        """Confirmar el pago desde el backend (sin Stripe)"""
         try:
-            payment_intent_id = request.data.get('payment_intent_id')
-            if not payment_intent_id:
+            factura_id = request.data.get('factura_id')
+            if not factura_id:
                 return Response(
-                    {'error': 'payment_intent_id es requerido'}, 
+                    {'error': 'factura_id es requerido'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Buscar el pago en la BD
+
+            # Buscar la factura y el pago pendiente
             try:
-                pago = Pago.objects.get(
-                    stripe_payment_intent_id=payment_intent_id,
-                    residente=request.user.residente
-                )
-            except Pago.DoesNotExist:
+                factura = Factura.objects.get(id=factura_id, residente=request.user.residente)
+            except Factura.DoesNotExist:
                 return Response(
-                    {'error': 'Pago no encontrado'}, 
+                    {'error': 'Factura no encontrada'},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            
-            # --- MODIFICACIÓN PARA GUARDAR COMO EXITO ---
-            pago.estado = 'completado'
-            pago.referencia_pago = payment_intent_id
-            pago.save()
-            
-            factura = pago.factura
+
+            # Buscar el último pago pendiente o crear uno nuevo
+            pago = Pago.objects.filter(
+                factura=factura,
+                residente=request.user.residente
+            ).order_by('-id').first()
+
+            if pago:
+                pago.estado = 'completado'
+                pago.metodo_pago = 'efectivo'
+                pago.save()
+            else:
+                pago = Pago.objects.create(
+                    factura=factura,
+                    residente=request.user.residente,
+                    monto=factura.monto_total,
+                    metodo_pago='efectivo',
+                    estado='completado'
+                )
+
             factura.estado = 'pagada'
             factura.save()
-            
+
             return Response({
                 'message': 'Pago confirmado exitosamente',
                 'pago_id': pago.id,
@@ -170,6 +180,6 @@ class PagoViewSet(viewsets.ModelViewSet):
             })
         except Exception as e:
             return Response(
-                {'error': str(e)}, 
+                {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
