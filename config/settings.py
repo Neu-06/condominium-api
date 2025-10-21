@@ -35,6 +35,7 @@ ALLOWED_HOSTS = [
     '.railway.app',
     '.up.railway.app',
     config('RAILWAY_PUBLIC_DOMAIN', default=''),
+    config('RENDER_EXTERNAL_HOSTNAME', default=''),
     '*',  
 ]
 
